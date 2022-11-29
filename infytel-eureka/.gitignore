@@ -31,3 +31,18 @@ build/
 
 ### VS Code ###
 .vscode/
+*.classpath
+*.class
+*.prefs
+*.jar
+*.lst
+*.project
+*.factorypath
+*.original
+target/
+.settings/
+.apt_generated
+.sts4-cache
+.springBeans
+maven-wrapper*
+mvnw*
