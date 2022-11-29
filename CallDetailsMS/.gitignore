@@ -45,3 +45,4 @@ target/
 .sts4-cache
 .springBeans
 */target/**
+/src/
