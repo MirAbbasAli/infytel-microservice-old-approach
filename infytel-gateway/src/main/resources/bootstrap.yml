@@ -1,0 +1,15 @@
+server:
+  port: 9000
+
+
+spring:
+  application:
+    name: GatewayMS
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:2222/eureka/
+    

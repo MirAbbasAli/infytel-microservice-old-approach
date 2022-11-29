@@ -1,50 +1,14 @@
 spring:
   application:
-    name: Eureka
-  config:
-    activate:
-      on-profile: Eureka1
+    name: Eureka1
 server:
   port: 2222 
 eureka:
   instance:
-    hostname: Eur1
+    hostname: localhost
   client:
-    registerWithEureka: true
-    fetchRegistry: true        
+    registerWithEureka: false
+    fetchRegistry: false        
     serviceUrl:
-      defaultZone: http://Eur2:2223/eureka/,http://Eur3:2224/eureka/
----
-spring:
-  application:
-    name: Eureka
-  config:
-    activate:
-      on-profile: Eureka2
-server:
-  port: 2223
-eureka:
-  instance:
-    hostname: Eur2
-  client:
-    registerWithEureka: true
-    fetchRegistry: true        
-    serviceUrl:
-      defaultZone: http://Eur1:2222/eureka/,http://Eur3:2224/eureka/
----
-spring:
-  application:
-    name: Eureka
-  config:
-    activate:
-      on-profile: Eureka3
-server:
-  port: 2224 
-eureka:
-  instance:
-    hostname: Eur3
-  client:
-    registerWithEureka: true
-    fetchRegistry: true        
-    serviceUrl:
-      defaultZone: http://Eur1:2222/eureka/,http://Eur2:2223/eureka/
+      defaultZone: http://localhost:2222/eureka
+
