@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,6 +20,8 @@ import com.infosys.infytel.customer.dto.LoginDTO;
 import com.infosys.infytel.customer.dto.PlanDTO;
 import com.infosys.infytel.customer.service.CustomerService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 @RestController
 @CrossOrigin
 @RefreshScope
@@ -31,12 +32,8 @@ public class CustomerController {
 	@Autowired
 	CustomerService custService;
 	
-	@Value("${friend.uri}")
-	String friendUri;
-
-	@Value("${path.uri}")
-	String pathUri;
-
+	@Autowired
+	RestTemplate template;
 	
 	// Create a new customer
 	@RequestMapping(value = "/customers", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -53,21 +50,26 @@ public class CustomerController {
 	}
 
 	// Fetches full profile of a specific customer
+	@CircuitBreaker(name="customerService", fallbackMethod="getCustomerProfileFallback")
 	@RequestMapping(value = "/customers/{phoneNo}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public CustomerDTO getCustomerProfile(@PathVariable Long phoneNo) {
 		
 		logger.info("Profile request for customer {}", phoneNo);
 		
 		CustomerDTO custDTO=custService.getCustomerProfile(phoneNo);
-		PlanDTO planDTO=new RestTemplate().getForObject(pathUri+custDTO.getCurrentPlan().getPlanId(), PlanDTO.class);
+		PlanDTO planDTO=template.getForObject("http://PlanMS/plans/"+custDTO.getCurrentPlan().getPlanId(), PlanDTO.class);
 		custDTO.setCurrentPlan(planDTO);
 		
 		@SuppressWarnings("unchecked")
-		List<Long> friends=new RestTemplate().getForObject(friendUri+phoneNo+"/friends", List.class);
+		List<Long> friends=template.getForObject("http://FriendMS/customers/"+phoneNo+"/friends", List.class);
 		custDTO.setFriendAndFamily(friends);
 		return custDTO;
 	}
-
+	
+	public CustomerDTO getCustomerProfileFallback(Long phoneNo, Throwable throwable) {
+		logger.info("============ In Fallback ================");
+		return new CustomerDTO();
+	}
 
 
 }

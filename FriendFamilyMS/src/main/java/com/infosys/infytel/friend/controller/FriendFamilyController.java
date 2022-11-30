@@ -38,6 +38,7 @@ public class FriendFamilyController {
 	@RequestMapping(value = "/customers/{phoneNo}/friends", method = RequestMethod.GET, produces= MediaType.APPLICATION_JSON_VALUE)
 	public List<Long> getSpecificFriends(@PathVariable Long phoneNo) {
 		logger.info("Friend and Family numbers for customer {}", phoneNo);
+		if(phoneNo==9009009001L) throw new RuntimeException();
 		return friendService.getSpecificFriends(phoneNo);
 	}
 
