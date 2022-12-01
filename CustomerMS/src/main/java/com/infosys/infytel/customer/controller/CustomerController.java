@@ -54,25 +54,13 @@ public class CustomerController {
 	public CustomerDTO getCustomerProfile(@PathVariable Long phoneNo) {
 		
 		logger.info("Profile request for customer {}", phoneNo);
-		long overallStart=System.currentTimeMillis();
-		
 		CustomerDTO custDTO=custService.getCustomerProfile(phoneNo);
-		long planStart=System.currentTimeMillis();
 		
 		Future<PlanDTO> futurePlanDTO=custCircuitService.getSpecificPlan(custDTO.getCurrentPlan().getPlanId());
-		long planEnd=System.currentTimeMillis();
-		
-		long friendStart=System.currentTimeMillis();
 		Future<List<Long>> futureFriends=custCircuitService.getSpecificFriends(phoneNo);
-		
-		long friendEnd=System.currentTimeMillis();
-		long overallEnd=System.currentTimeMillis();
 		
 		custDTO.setCurrentPlan(futurePlanDTO.get());
 		custDTO.setFriendAndFamily(futureFriends.get());
-		logger.info("Total overall Time Taken for the Request {}", overallEnd-overallStart);
-		logger.info("Total Time Taken for the Plan Request {}", planEnd-planStart);
-		logger.info("Total Time Taken for the Friend Request {}", friendEnd-friendStart);
 		
 		return custDTO;
 	}

@@ -37,11 +37,6 @@ public class PlanController {
 	@RequestMapping(value = "/plans/{planId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public PlanDTO getSpecificPlans(@PathVariable Integer planId) {
 		logger.info("Fetching details of plan {}",planId);
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		return planService.getSpecificPlan(planId);
 	}
 

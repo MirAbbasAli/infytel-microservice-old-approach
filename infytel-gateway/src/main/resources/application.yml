@@ -8,15 +8,15 @@ spring:
       - id: CallDetailsMS
         uri: lb://CallDetailsMS/
         predicates:
-        - Path=/customers/*/calldetails
+        - Path=/customers/{segment}/calldetails
       - id: CustomerMS
         uri: lb://CustomerMS
         predicates:
-        - Path=/customers/**
+        - Path=/customers/{segment}
       - id: FriendMS
         uri: lb://FriendMS
         predicates:
-        - Path=/customers/*/friends
+        - Path=/customers/{segment}/friends
       - id: PlanMS
         uri: lb://PlanMS
         predicates:

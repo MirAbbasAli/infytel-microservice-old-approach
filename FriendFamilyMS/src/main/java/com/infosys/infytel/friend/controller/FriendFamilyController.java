@@ -39,11 +39,6 @@ public class FriendFamilyController {
 	public List<Long> getSpecificFriends(@PathVariable Long phoneNo) {
 		logger.info("Friend and Family numbers for customer {}", phoneNo);
 		if(phoneNo==9009009001L) throw new RuntimeException();
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		return friendService.getSpecificFriends(phoneNo);
 	}
 
