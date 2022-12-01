@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import com.infosys.infytel.customer.dto.CustomerDTO;
 import com.infosys.infytel.customer.dto.LoginDTO;
 import com.infosys.infytel.customer.dto.PlanDTO;
+import com.infosys.infytel.customer.service.CustomerCircuitBreakerService;
 import com.infosys.infytel.customer.service.CustomerService;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -33,7 +34,7 @@ public class CustomerController {
 	CustomerService custService;
 	
 	@Autowired
-	RestTemplate template;
+	private CustomerCircuitBreakerService custCircuitService;
 	
 	// Create a new customer
 	@RequestMapping(value = "/customers", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -50,25 +51,31 @@ public class CustomerController {
 	}
 
 	// Fetches full profile of a specific customer
-	@CircuitBreaker(name="customerService", fallbackMethod="getCustomerProfileFallback")
 	@RequestMapping(value = "/customers/{phoneNo}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public CustomerDTO getCustomerProfile(@PathVariable Long phoneNo) {
 		
 		logger.info("Profile request for customer {}", phoneNo);
+		long overallStart=System.currentTimeMillis();
 		
 		CustomerDTO custDTO=custService.getCustomerProfile(phoneNo);
-		PlanDTO planDTO=template.getForObject("http://PlanMS/plans/"+custDTO.getCurrentPlan().getPlanId(), PlanDTO.class);
-		custDTO.setCurrentPlan(planDTO);
+		long planStart=System.currentTimeMillis();
 		
-		@SuppressWarnings("unchecked")
-		List<Long> friends=template.getForObject("http://FriendMS/customers/"+phoneNo+"/friends", List.class);
+		PlanDTO planDTO=custCircuitService.getSpecificPlan(custDTO.getCurrentPlan().getPlanId());
+		long planEnd=System.currentTimeMillis();
+		
+		long friendStart=System.currentTimeMillis();
+		List<Long> friends=custCircuitService.getSpecificFriends(phoneNo);
+		
+		long friendEnd=System.currentTimeMillis();
+		long overallEnd=System.currentTimeMillis();
+		
+		custDTO.setCurrentPlan(planDTO);
 		custDTO.setFriendAndFamily(friends);
+		logger.info("Total overall Time Taken for the Request {}", overallEnd-overallStart);
+		logger.info("Total Time Taken for the Plan Request {}", planEnd-planStart);
+		logger.info("Total Time Taken for the Friend Request {}", friendEnd-friendStart);
+		
 		return custDTO;
-	}
-	
-	public CustomerDTO getCustomerProfileFallback(Long phoneNo, Throwable throwable) {
-		logger.info("============ In Fallback ================");
-		return new CustomerDTO();
 	}
 
 
